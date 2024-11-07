@@ -57,11 +57,33 @@ export default function ChatInterface() {
       setSessionId(data.session_id)
     });
 
+    eventSource.addEventListener("assistant_msg_start", (e) => {
+      console.log("New assistant message start");
+    
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: "assistant", content: "" }, // Start with an empty content
+      ]);
+    });
+
     eventSource.addEventListener("assistant", (e) => {
       const data = JSON.parse(e.data);
+      console.log("Data", data);
       console.log("New assistant message:", data.search_result);
-      setMessages((prevMessages) => [...prevMessages, { role: "assistant", content: data.search_result }]);
-      setSessionId(data.session_id)
+    
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        const lastIndex = updatedMessages.length - 1;
+    
+        // Check if there's at least one message
+        if (lastIndex >= 0) {
+          updatedMessages[lastIndex] = {
+            ...updatedMessages[lastIndex],
+            content: updatedMessages[lastIndex].content + data.search_result,
+          };
+        }
+        return updatedMessages;
+      });
     });
 
     eventSource.onerror = (e) => {
