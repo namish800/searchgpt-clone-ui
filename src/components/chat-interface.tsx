@@ -54,7 +54,6 @@ export default function ChatInterface() {
       const data = JSON.parse(e.data);
       console.log("New thought:", data.message);
       setThoughts((prevThoughts) => [...prevThoughts, data.message]);
-      setSessionId(data.session_id)
     });
 
     eventSource.addEventListener("assistant_msg_start", (e) => {
@@ -64,6 +63,15 @@ export default function ChatInterface() {
         ...prevMessages,
         { role: "assistant", content: "" }, // Start with an empty content
       ]);
+    });
+
+    eventSource.addEventListener("start_session", (e) => {
+      console.log("New session started");
+      const data = JSON.parse(e.data);
+      console.log("Data", data);
+      setSessionId((id)=>{
+        return data['session_id']
+      })
     });
 
     eventSource.addEventListener("assistant", (e) => {
@@ -82,7 +90,7 @@ export default function ChatInterface() {
             content: updatedMessages[lastIndex].content + data.search_result,
           };
         }
-        return updatedMessages;
+        return updatedMessages; 
       });
     });
 
